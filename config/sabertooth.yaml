@@ -1,0 +1,24 @@
+# Path to serial port
+#port: '/dev/tty05'
+port: '/dev/tty5'
+
+# Baud rate of serial port. Default value = 9600 (optional)
+baud: 34800
+
+# Address of Sabertooth H-Bridge
+address: 128
+
+# Minimum battery voltage. Range 6V to 30V, Default = 0V (optional)
+min_voltage: 10.0
+
+# Maximum battery voltage. Range 0V to 25V, Default = 30V (optional)
+#max_voltage: 25.0
+
+# Deadband count. Range 0 to 127, Default = 0 (optional)
+deadband: 3
+
+# Serial timeout in miliseconds. Range 0 (off) to 25500, Default = 0 (optional)
+timeout: 500
+
+# Output ramping time. Default = 1 (optional)
+#ramping: 1
