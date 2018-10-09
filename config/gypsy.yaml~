@@ -1,8 +1,0 @@
-# Distance between the left and right wheels
-wheel_base: 0.33655
-
-# The diameter of the wheels
-wheel_diameter: 0.123825
-
-# The number of ticks per revolution
-encoder_count: 100
