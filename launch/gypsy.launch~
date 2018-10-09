@@ -1,8 +1,0 @@
-<launch>
-	<rosparam command="load" file="$(find gypsy)/config/gypsy.yaml" />
-
-	<node name="gypsy_odometry" pkg="gypsy_odometry" type="gypsy_odometry_node" ></node>
-	<node name="sabertooth_driver" pkg="sabertooth_driver" type="sabertooth_driver_node" >
-		<rosparam command="load" file="$(find gypsy)/config/sabertooth.yaml" />
-	</node>
-</launch>
