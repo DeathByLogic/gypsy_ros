@@ -1,0 +1,77 @@
+<launch>
+  # Run in simulation mode
+  <arg name="simulation" default="false" />
+
+  <arg name="drive_Kp" default="70.0" />
+  <arg name="drive_Ki" default="100.0" />
+  <arg name="drive_Kd" default="0.5" />
+
+  <arg name="turn_Kp" default="25.0" />
+  <arg name="turn_Ki" default="100.0" />
+  <arg name="turn_Kd" default="0.2" />
+
+  <node name="enable_pid" pkg="rostopic" type="rostopic" 
+    args="pub -r 10 /pid_enable std_msgs/Bool -- 'true'" />
+
+  <group ns="drive">
+    <node name="drive_pid" pkg="pid" type="controller" >
+      <param name="Kp" value="$(arg drive_Kp)" />
+      <param name="Ki" value="$(arg drive_Ki)" />
+      <param name="Kd" value="$(arg drive_Kd)" />
+      <param name="upper_limit" value="127" />
+      <param name="lower_limit" value="-127" />
+      <param name="windup_limit" value="10" />
+      <param name="max_loop_frequency" value="100.0" />
+      <param name="min_loop_frequency" value="100.0" />
+      <param name="pid_enable_topic" value="/pid_enable" />
+    </node>
+
+    <node name="drive_cmd_transform" pkg="topic_tools" type="transform"
+      args="/cmd_vel/linear/x setpoint std_msgs/Float64 'm'" />
+
+    <node name="drive_plant_transform" pkg="topic_tools" type="transform"
+      args="/odom/twist/twist/linear/x state std_msgs/Float64 'm'" />
+  </group>
+
+  <group ns="turn">
+    <node name="turn_pid" pkg="pid" type="controller">
+      <param name="Kp" value="$(arg turn_Kp)" />
+      <param name="Ki" value="$(arg turn_Ki)" />
+      <param name="Kd" value="$(arg turn_Kd)" />
+      <param name="upper_limit" value="127" />
+      <param name="lower_limit" value="-127" />
+      <param name="windup_limit" value="10" />
+      <param name="max_loop_frequency" value="100.0" />
+      <param name="min_loop_frequency" value="100.0" />
+      <param name="pid_enable_topic" value="/pid_enable" />
+    </node>
+
+    <node name="turn_cmd_transform" pkg="topic_tools" type="transform"
+      args="/cmd_vel/angular/z setpoint std_msgs/Float64 'm'" />
+
+    <node name="turn_plant_transform" pkg="topic_tools" type="transform"
+      args="/odom/twist/twist/angular/z state std_msgs/Float64 'm'" />
+  </group>
+  
+  # Run the Sabertooth Drive if not in simulation mode
+  <node name="sabertooth_driver" pkg="sabertooth_driver" type="sabertooth_driver_node" unless="$(arg simulation)" >
+    <rosparam command="load" file="$(find gypsy)/config/sabertooth.yaml" />
+
+    <param name="mixed_mode" value="true" />
+    <param name="drive_topic" value="/drive/control_effort" />
+    <param name="turn_topic" value="/turn/control_effort" />
+  </node>
+
+  # Run the Gypsy base simulator if in simulation mode
+  <node name="gypsy_simulator" pkg="gypsy_simulator" type="gypsy_simulator_node" if="$(arg simulation)">
+    <param name="wheel_base" value="0.33655" />
+    <param name="max_speed" value="1.035" />
+    <param name="max_turn" value="1.035" />
+    <param name="drive_topic" value="/drive/control_effort" />
+    <param name="turn_topic" value="/turn/control_effort" />
+  </node>
+
+  # Run the Gypsy odometry publisher if not in simulation mode
+  <node name="gypsy_odometry" pkg="gypsy_odometry" type="gypsy_odometry_node" unless="$(arg simulation)" />
+
+</launch>

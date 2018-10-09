@@ -1,9 +1,15 @@
 <launch>
   <rosparam command="load" file="$(find gypsy)/config/gypsy.yaml" />
+  
+  # Run in simulation mode
+  <arg name="simulation" default="false" />
+    
+  <node name="vel" pkg="rostopic" type="rostopic"
+    args="pub -r 10 /cmd_vel geometry_msgs/Twist -- '[0.5, 0, 0]' '[0, 0, 0]'" />
 
-  <node name="gypsy_odometry" pkg="gypsy_odometry" type="gypsy_odometry_node" ></node>
-  <node name="sabertooth_driver" pkg="sabertooth_driver" type="sabertooth_driver_node" >
-    <rosparam command="load" file="$(find gypsy)/config/sabertooth.yaml" />
-  </node>
+  # Include the startup for the base
+  <include file="$(find gypsy)/launch/gypsy_base.launch">
+    <arg name="simulation" value="$(arg simulation)" />
+  </include>
 
 </launch>
