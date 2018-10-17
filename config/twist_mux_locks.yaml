@@ -1,0 +1,11 @@
+locks:
+-
+  name    : pause
+  topic   : pause_navigation
+  timeout : 0.0
+  priority: 100
+-
+  name    : teleop 
+  topic   : teleop_priority
+  timeout : 0.0
+  priority: 100

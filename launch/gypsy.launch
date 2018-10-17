@@ -1,15 +1,32 @@
 <launch>
-  <rosparam command="load" file="$(find gypsy)/config/gypsy.yaml" />
+  <rosparam command="load" file="$(find gypsy)/config/gypsy_base.yaml" />
   
-  # Run in simulation mode
+  <!-- Run in simulation mode -->
   <arg name="simulation" default="false" />
-    
-  <node name="vel" pkg="rostopic" type="rostopic"
-    args="pub -r 10 /cmd_vel geometry_msgs/Twist -- '[0.5, 0, 0]' '[0, 0, 0]'" />
 
-  # Include the startup for the base
+  <!-- Load the robot description -->
+  <arg name="urdf" default="$(find xacro)/xacro.py '$(find gypsy_description)/urdf/gypsy.xacro'" />
+  <param name="robot_description" command="$(arg urdf)" />
+
+  <!-- Mux for cmd_vel -->
+  <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
+    <remap from="cmd_vel_out" to="/cmd_vel"/>
+
+    <rosparam file="$(find gypsy)/config/twist_mux_topics.yaml" command="load" />
+    <rosparam file="$(find gypsy)/config/twist_mux_locks.yaml" command="load" />
+  </node>
+
+  <!-- Include the navigation stack -->
+  <include file="$(find gypsy)/launch/gypsy_navigation.launch">
+    <arg name="simulation" value="$(arg simulation)" />
+  </include> 
+
+  <!-- Include the startup for the base -->
   <include file="$(find gypsy)/launch/gypsy_base.launch">
     <arg name="simulation" value="$(arg simulation)" />
   </include>
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
 </launch>
